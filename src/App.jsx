@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Download,
   Upload,
+  HelpCircle,
+  Info,
 } from 'lucide-react';
 
 // --- アスキーアート（重ね合わせ合成用パーツ） ---
@@ -409,12 +411,17 @@ export default function App() {
   }, [step]);
 
   useEffect(() => {
-    // バグ修正: 'settings' 画面にいる時も保存対象から除外する
+    // バグ修正: 'settings', 'help' 画面にいる時も保存対象から除外する
     const isRecording =
       currentPeriod &&
-      !['home', 'select_period', 'result', 'evolution', 'settings'].includes(
-        step
-      );
+      ![
+        'home',
+        'select_period',
+        'result',
+        'evolution',
+        'settings',
+        'help',
+      ].includes(step);
     if (isRecording) {
       setSavedData((prev) => ({
         ...prev,
@@ -602,8 +609,13 @@ export default function App() {
     setStepHistory(['select_period']); // 履歴を初期化してセット
     const data = savedData[period.id];
 
-    // バグ修正: もし既にバグで 'settings' が保存されてしまっていた場合は無視して最初から始める
-    if (data && data.status === 'in_progress' && data.step !== 'settings') {
+    // バグ修正: もし既にバグで 'settings' や 'help' が保存されてしまっていた場合は無視して最初から始める
+    if (
+      data &&
+      data.status === 'in_progress' &&
+      data.step !== 'settings' &&
+      data.step !== 'help'
+    ) {
       setInputs(data.inputs || { banks: [] });
       setStep(data.step);
     } else {
@@ -1660,7 +1672,89 @@ export default function App() {
 
         <div className="flex-1 overflow-y-auto bg-white relative">
           <div className="h-full">
-            {step === 'settings' ? (
+            {step === 'help' ? (
+              <div className="flex flex-col h-full justify-start pt-8 px-4 animate-fade-in pb-10">
+                <div className="flex justify-between items-center mb-6 border-b-2 border-stone-800 pb-2">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <HelpCircle size={24} /> アソビカタ
+                  </h2>
+                  <button
+                    onClick={() => setStep('settings')}
+                    className="p-2 border-2 border-stone-800 bg-white rounded"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-6 overflow-y-auto pr-2 pb-8">
+                  <div className="bg-stone-100 border-2 border-stone-800 p-4 rounded-lg">
+                    <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                      🥚 マネコロとは？
+                    </h3>
+                    <p className="text-sm leading-relaxed text-stone-700">
+                      細かいレシート入力は不要！
+                      <br />
+                      月に1回、<b>「現実の残高」</b>と<b>「使った感覚」</b>
+                      を入力して、そのズレを無くしていく育成ゲームです。
+                      <br />
+                      ズレが少ないほど、マネコロは立派に成長します。
+                    </p>
+                  </div>
+
+                  <div className="bg-white border-2 border-stone-800 p-4 rounded-lg shadow-[2px_2px_0_0_#292524]">
+                    <h3 className="font-bold text-lg mb-2">📝 キロクの手順</h3>
+                    <ol className="text-sm space-y-3 text-stone-700 list-decimal list-inside font-bold">
+                      <li className="pb-2 border-b border-stone-200">
+                        <span className="text-stone-800">
+                          最初は「今の全資産」を入力！
+                        </span>
+                        <br />
+                        <span className="font-normal text-xs ml-4">
+                          今の銀行や財布のお金をざっくり入力すると、タマゴが誕生します。
+                        </span>
+                      </li>
+                      <li className="pb-2 border-b border-stone-200">
+                        <span className="text-stone-800">
+                          次回からが本番（答え合わせ）
+                        </span>
+                        <br />
+                        <span className="font-normal text-xs ml-4">
+                          給料日などに「キロク スル」を押して、
+                          <b>①リアルな残高</b>と<b>②使った感覚</b>を入力します。
+                        </span>
+                      </li>
+                      <li>
+                        <span className="text-stone-800">ケッカハッピョウ</span>
+                        <br />
+                        <span className="font-normal text-xs ml-4">
+                          現実と感覚のズレが計算され、結果に応じてマネコロが進化します！
+                        </span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-stone-800 text-white border-2 border-stone-800 p-4 rounded-lg">
+                    <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                      🌟 進化のヒント
+                    </h3>
+                    <ul className="text-sm space-y-2 text-stone-300">
+                      <li>
+                        ・ズレが少ないと{' '}
+                        <b className="text-yellow-400">EP(進化ポイント)</b>{' '}
+                        を獲得！
+                      </li>
+                      <li>
+                        ・純資産(貯金)が増えると、マネコロが{' '}
+                        <b className="text-green-400">巨大化</b> します。
+                      </li>
+                      <li>
+                        ・ズレが大きすぎると、ヤミのオーラに包まれてしまうかも...
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : step === 'settings' ? (
               <div className="flex flex-col h-full justify-start pt-12 px-4 animate-fade-in pb-10">
                 <div className="flex justify-between items-center mb-6 border-b-2 border-stone-800 pb-2">
                   <h2 className="text-xl font-bold">セッテイ</h2>
@@ -1675,6 +1769,17 @@ export default function App() {
                   </button>
                 </div>
                 <div className="space-y-6">
+                  {/* ヘルプボタンを追加 */}
+                  <button
+                    onClick={() => setStep('help')}
+                    className="w-full border-2 border-stone-800 bg-stone-800 text-white p-4 font-bold text-lg flex justify-between items-center hover:bg-stone-700 active:translate-y-1 rounded-lg shadow-[2px_2px_0_0_#292524]"
+                  >
+                    <span className="flex items-center gap-2">
+                      <HelpCircle size={20} /> アソビカタ (ヘルプ)
+                    </span>
+                    <ChevronRight size={20} />
+                  </button>
+
                   <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
                     <h3 className="font-bold mb-2">記録のペース</h3>
                     <select

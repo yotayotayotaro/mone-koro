@@ -765,7 +765,8 @@ export default function App() {
     const newLevel = Math.max(1, 1 + Math.floor(growthAmount / 50000));
     const displayLevel = Math.min(newLevel, 16);
 
-    const newScale = 1.0 + (displayLevel - 1) * 0.08;
+    // 【修正】倍率を最大約3倍に戻し、枠に収まらないほどの巨大さを演出
+    const newScale = 1.0 + (displayLevel - 1) * 0.133;
 
     newChar.level = newLevel;
     newChar.sizeScale = newScale;
@@ -842,7 +843,8 @@ export default function App() {
       transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
     };
     return (
-      <div className="flex justify-center items-center h-48 sm:h-64 relative overflow-visible pointer-events-none opacity-90">
+      // 【修正】overflow-visible を overflow-hidden に変更し、はみ出た部分を非表示（クリッピング）にする
+      <div className="flex justify-center items-center h-48 sm:h-64 relative overflow-hidden pointer-events-none opacity-90 w-full">
         <div
           style={scaleStyle}
           className="font-mono whitespace-pre leading-none text-stone-800 text-sm sm:text-lg text-center flex flex-col items-center origin-center"
@@ -1177,18 +1179,23 @@ export default function App() {
     10
   );
 
+  // グラフ上の絶対位置(left%)を計算 (等間隔に配置)
   const getLeftPercent = (i) => (i / Math.max(dataLen - 1, 1)) * 100;
-  const getTransform = (i) => {
-    if (i === 0) return 'translateX(0)';
-    if (i === dataLen - 1) return 'translateX(-100%)';
-    return 'translateX(-50%)';
-  };
 
-  // --- 数値を「万円単位 (小数第1位)」でフォーマットする関数 ---
+  // ラベルフォーマット (例: 25/4)
+  const shortLabel = (d) =>
+    d
+      ? d.label
+          .replace('年 ', '/')
+          .replace('月分', '')
+          .replace('第', 'w')
+          .replace('週', '')
+      : '';
+
+  // 数値を「万円単位 (小数第1位)」でフォーマットする関数
   const formatToMan = (val) => {
     if (val === 0) return '0';
     const man = val / 10000;
-    // 小数第1位まで表示（ピッタリの時は整数のみ）
     return Number.isInteger(man) ? man.toLocaleString() : man.toFixed(1);
   };
 
@@ -1237,101 +1244,157 @@ export default function App() {
           <div className="space-y-6">
             {/* 資産推移 */}
             <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-2 border-b border-stone-200 pb-2">
-                <h3 className="text-sm font-bold">
-                  ■ 資産推移 (総資産 / 純資産)
+              {/* 【修正】タイトルの改行防止、1行に収める */}
+              <div className="flex flex-wrap justify-between items-center mb-2 border-b border-stone-200 pb-2 gap-y-1">
+                <h3 className="text-xs sm:text-sm font-bold whitespace-nowrap mr-2">
+                  ■ 資産推移 (総資産/純資産)
                 </h3>
-                <div className="flex gap-3 text-[10px] font-bold">
+                <div className="flex gap-2 sm:gap-3 text-[10px] font-bold whitespace-nowrap">
                   <span className="flex items-center gap-1">
-                    <div className="w-3 h-1 bg-green-500"></div> 総資産
+                    <div className="w-3 h-1 bg-green-500"></div>総資産
                   </span>
                   <span className="flex items-center gap-1">
-                    <div className="w-3 h-1 bg-blue-500"></div> 純資産
+                    <div className="w-3 h-1 bg-blue-500"></div>純資産
                   </span>
                 </div>
               </div>
 
-              <div className="relative h-10 w-full mb-1">
-                {uniqueTargetIndices.map((i) => {
-                  const d = pageData[i];
-                  return (
-                    <div
-                      key={i}
-                      className="absolute flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10"
-                      style={{
-                        left: `${getLeftPercent(i)}%`,
-                        transform: getTransform(i),
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      <span className="text-[8px] text-stone-500 font-bold mb-0.5">
-                        {d.label
-                          .replace('年 ', '/')
-                          .replace('月分', '')
-                          .replace('第', 'w')
-                          .replace('週', '')}
-                      </span>
-                      <span className="text-[10px] text-green-600 font-bold leading-none">
-                        {Math.round(d.totalAssets / 1000).toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-blue-600 font-bold leading-none mt-0.5">
-                        {Math.round(d.pureAssets / 1000).toLocaleString()}
-                      </span>
-                    </div>
-                  );
-                })}
+              {/* ピックアップラベル */}
+              <div className="relative h-10 w-full mb-1 pl-8 pr-4">
+                {' '}
+                {/* 【修正】グラフ本体とパディングを合わせる */}
+                <div className="relative w-full h-full">
+                  {uniqueTargetIndices.map((i) => {
+                    const d = pageData[i];
+                    return (
+                      <div
+                        key={i}
+                        className="absolute flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap"
+                        style={{
+                          left: `${getLeftPercent(i)}%`,
+                          transform: 'translateX(-50%)',
+                        }}
+                      >
+                        <span className="text-[8px] text-stone-500 font-bold mb-0.5">
+                          {shortLabel(d)}
+                        </span>
+                        <span className="text-[10px] text-green-600 font-bold leading-none">
+                          {Math.round(d.totalAssets / 1000).toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-blue-600 font-bold leading-none mt-0.5">
+                          {Math.round(d.pureAssets / 1000).toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="relative h-32 w-full border-l-2 border-b-2 border-stone-800">
-                <svg
-                  className="absolute inset-0 h-full w-full overflow-visible"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  {pageData.length > 1 && (
-                    <>
-                      <polyline
-                        points={pageData
-                          .map(
-                            (d, i) =>
-                              `${getLeftPercent(i)},${getAssetY(d.totalAssets)}`
-                          )
-                          .join(' ')}
-                        fill="none"
-                        stroke="#22c55e"
-                        strokeWidth="2"
-                      />
-                      <polyline
-                        points={pageData
-                          .map(
-                            (d, i) =>
-                              `${getLeftPercent(i)},${getAssetY(d.pureAssets)}`
-                          )
-                          .join(' ')}
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="2"
-                        strokeDasharray="4 2"
-                      />
-                    </>
-                  )}
+              {/* グラフ本体共通コンテナ（目盛り付き） */}
+              <div className="relative mt-2 pl-8 pr-4">
+                {/* Y軸ラベル */}
+                <div className="absolute left-0 top-0 bottom-0 w-7 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
+                  <span className="translate-y-[-50%]">
+                    {formatToMan(maxAssets)}
+                  </span>
+                  <span className="translate-y-[-50%]">
+                    {formatToMan((maxAssets + minAssets) / 2)}
+                  </span>
+                  <span className="translate-y-[50%]">
+                    {formatToMan(minAssets)}
+                  </span>
+                </div>
+
+                {/* グラフ領域 */}
+                <div className="relative w-full h-32 border-l-2 border-b-2 border-stone-800">
+                  {/* 背景の目盛り線 */}
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '0%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '25%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '50%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '75%' }}
+                  ></div>
+
+                  <svg
+                    className="absolute inset-0 h-full w-full overflow-visible"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    {pageData.length > 1 && (
+                      <>
+                        <polyline
+                          points={pageData
+                            .map(
+                              (d, i) =>
+                                `${getLeftPercent(i)},${getAssetY(
+                                  d.totalAssets
+                                )}`
+                            )
+                            .join(' ')}
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2"
+                        />
+                        <polyline
+                          points={pageData
+                            .map(
+                              (d, i) =>
+                                `${getLeftPercent(i)},${getAssetY(
+                                  d.pureAssets
+                                )}`
+                            )
+                            .join(' ')}
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="2"
+                          strokeDasharray="4 2"
+                        />
+                      </>
+                    )}
+                    {pageData.map((d, i) => (
+                      <g key={i}>
+                        <circle
+                          cx={getLeftPercent(i)}
+                          cy={getAssetY(d.totalAssets)}
+                          r="2.5"
+                          fill="#22c55e"
+                        />
+                        <circle
+                          cx={getLeftPercent(i)}
+                          cy={getAssetY(d.pureAssets)}
+                          r="2.5"
+                          fill="#3b82f6"
+                        />
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+
+                {/* X軸ラベル */}
+                <div className="relative w-full h-4 mt-1">
                   {pageData.map((d, i) => (
-                    <g key={i}>
-                      <circle
-                        cx={getLeftPercent(i)}
-                        cy={getAssetY(d.totalAssets)}
-                        r="2.5"
-                        fill="#22c55e"
-                      />
-                      <circle
-                        cx={getLeftPercent(i)}
-                        cy={getAssetY(d.pureAssets)}
-                        r="2.5"
-                        fill="#3b82f6"
-                      />
-                    </g>
+                    <span
+                      key={i}
+                      className="absolute text-[6px] sm:text-[8px] text-stone-500"
+                      style={{
+                        left: `${getLeftPercent(i)}%`,
+                        transform: 'translateX(-50%)',
+                      }}
+                    >
+                      {shortLabel(d)}
+                    </span>
                   ))}
-                </svg>
+                </div>
               </div>
             </div>
 
@@ -1339,7 +1402,8 @@ export default function App() {
             <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
               <div className="mb-2 border-b border-stone-200 pb-2">
                 <h3 className="text-sm font-bold mb-1">■ 支出内訳推移</h3>
-                <div className="flex gap-2 text-[10px] font-bold">
+                {/* 【修正】凡例を左上配置、折り返し禁止 */}
+                <div className="flex gap-2 text-[10px] font-bold whitespace-nowrap">
                   <span className="text-orange-500">■食費</span>
                   <span className="text-blue-500">■日用品</span>
                   <span className="text-purple-500">■趣味</span>
@@ -1348,105 +1412,144 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="relative h-20 w-full mb-2">
-                {uniqueTargetIndices.map((i) => {
-                  const d = pageData[i];
-                  return (
-                    <div
-                      key={i}
-                      className="absolute flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10"
-                      style={{
-                        left: `${getLeftPercent(i)}%`,
-                        transform: getTransform(i),
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      <span className="text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center">
-                        {d.label
-                          .replace('年 ', '/')
-                          .replace('月分', '')
-                          .replace('第', 'w')
-                          .replace('週', '')}
-                      </span>
-                      <span className="text-[9px] font-black text-center mb-0.5">
-                        計: {Math.round(d.expTotal / 1000).toLocaleString()}
-                      </span>
-                      <div className="grid grid-cols-2 gap-x-2 text-[8px] font-bold leading-tight">
-                        <span className="text-orange-600">
-                          食:{Math.round(d.exp.food / 1000)}
-                        </span>
-                        <span className="text-blue-600">
-                          日:{Math.round(d.exp.daily / 1000)}
-                        </span>
-                        <span className="text-purple-600">
-                          趣:{Math.round(d.exp.hobby / 1000)}
-                        </span>
-                        <span className="text-green-600">
-                          固:{Math.round(d.exp.fixed / 1000)}
-                        </span>
-                        <span className="text-yellow-600 col-span-2 text-center">
-                          他:{Math.round(d.exp.others / 1000)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div
-                className="relative h-32 w-full border-l-2 border-b-2 border-stone-800 grid gap-0.5 px-1 items-end"
-                style={{
-                  gridTemplateColumns: `repeat(${dataLen}, minmax(0, 1fr))`,
-                }}
-              >
-                {Array.from({ length: dataLen }).map((_, i) => {
-                  const d = pageData[i];
-                  if (!d)
+              <div className="relative h-20 w-full mb-2 pl-8 pr-4">
+                <div className="relative w-full h-full">
+                  {uniqueTargetIndices.map((i) => {
+                    const d = pageData[i];
                     return (
                       <div
                         key={i}
-                        className="flex flex-col w-full h-full"
-                      ></div>
+                        className="absolute flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap"
+                        style={{
+                          left: `${getLeftPercent(i)}%`,
+                          transform: 'translateX(-50%)',
+                        }}
+                      >
+                        <span className="text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center">
+                          {shortLabel(d)}
+                        </span>
+                        <span className="text-[9px] font-black text-center mb-0.5">
+                          計: {Math.round(d.expTotal / 1000).toLocaleString()}
+                        </span>
+                        <div className="grid grid-cols-2 gap-x-2 text-[8px] font-bold leading-tight">
+                          <span className="text-orange-600">
+                            食:{Math.round(d.exp.food / 1000)}
+                          </span>
+                          <span className="text-blue-600">
+                            日:{Math.round(d.exp.daily / 1000)}
+                          </span>
+                          <span className="text-purple-600">
+                            趣:{Math.round(d.exp.hobby / 1000)}
+                          </span>
+                          <span className="text-green-600">
+                            固:{Math.round(d.exp.fixed / 1000)}
+                          </span>
+                          <span className="text-yellow-600 col-span-2 text-center">
+                            他:{Math.round(d.exp.others / 1000)}
+                          </span>
+                        </div>
+                      </div>
                     );
-                  return (
-                    <div
+                  })}
+                </div>
+              </div>
+
+              {/* グラフ本体共通コンテナ */}
+              <div className="relative mt-2 pl-8 pr-4">
+                {/* Y軸ラベル */}
+                <div className="absolute left-0 top-0 bottom-0 w-7 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
+                  <span className="translate-y-[-50%]">
+                    {formatToMan(maxExp)}
+                  </span>
+                  <span className="translate-y-[-50%]">
+                    {formatToMan(maxExp / 2)}
+                  </span>
+                  <span className="translate-y-[50%]">0</span>
+                </div>
+
+                {/* グラフ領域 */}
+                <div className="relative w-full h-32 border-l-2 border-b-2 border-stone-800">
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '0%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '25%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '50%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '75%' }}
+                  ></div>
+
+                  {/* 【修正】絶対配置でラベルとX座標を完全に同期し、等間隔に */}
+                  {Array.from({ length: dataLen }).map((_, i) => {
+                    const d = pageData[i];
+                    if (!d) return null;
+                    return (
+                      <div
+                        key={i}
+                        className="absolute bottom-0 flex flex-col justify-end w-3 sm:w-4"
+                        style={{
+                          left: `${getLeftPercent(i)}%`,
+                          transform: 'translateX(-50%)',
+                          height: `${(d.expTotal / maxExp) * 100}%`,
+                        }}
+                      >
+                        <div
+                          className="bg-yellow-400 w-full"
+                          style={{
+                            height: `${(d.exp.others / d.expTotal) * 100}%`,
+                          }}
+                        ></div>
+                        <div
+                          className="bg-green-400 w-full"
+                          style={{
+                            height: `${(d.exp.fixed / d.expTotal) * 100}%`,
+                          }}
+                        ></div>
+                        <div
+                          className="bg-purple-400 w-full"
+                          style={{
+                            height: `${(d.exp.hobby / d.expTotal) * 100}%`,
+                          }}
+                        ></div>
+                        <div
+                          className="bg-blue-400 w-full"
+                          style={{
+                            height: `${(d.exp.daily / d.expTotal) * 100}%`,
+                          }}
+                        ></div>
+                        <div
+                          className="bg-orange-400 w-full"
+                          style={{
+                            height: `${(d.exp.food / d.expTotal) * 100}%`,
+                          }}
+                        ></div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* X軸ラベル */}
+                <div className="relative w-full h-4 mt-1">
+                  {pageData.map((d, i) => (
+                    <span
                       key={i}
-                      className="flex flex-col w-full"
-                      style={{ height: `${(d.expTotal / maxExp) * 100}%` }}
+                      className="absolute text-[6px] sm:text-[8px] text-stone-500"
+                      style={{
+                        left: `${getLeftPercent(i)}%`,
+                        transform: 'translateX(-50%)',
+                      }}
                     >
-                      <div
-                        className="bg-yellow-400 w-full"
-                        style={{
-                          height: `${(d.exp.others / d.expTotal) * 100}%`,
-                        }}
-                      ></div>
-                      <div
-                        className="bg-green-400 w-full"
-                        style={{
-                          height: `${(d.exp.fixed / d.expTotal) * 100}%`,
-                        }}
-                      ></div>
-                      <div
-                        className="bg-purple-400 w-full"
-                        style={{
-                          height: `${(d.exp.hobby / d.expTotal) * 100}%`,
-                        }}
-                      ></div>
-                      <div
-                        className="bg-blue-400 w-full"
-                        style={{
-                          height: `${(d.exp.daily / d.expTotal) * 100}%`,
-                        }}
-                      ></div>
-                      <div
-                        className="bg-orange-400 w-full"
-                        style={{
-                          height: `${(d.exp.food / d.expTotal) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                  );
-                })}
+                      {shortLabel(d)}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1454,84 +1557,113 @@ export default function App() {
             <div className="border-2 border-stone-800 bg-white p-3 rounded-lg shrink-0">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-bold">■ 差異率推移</h3>
-                <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-1 rounded">
+                <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-1 rounded whitespace-nowrap">
                   差額÷収入(%)
                 </span>
               </div>
-              <div className="relative h-24 w-full border-l-2 border-stone-800 mt-4">
-                <div
-                  className="absolute w-full border-t-2 border-dashed border-stone-400"
-                  style={{ top: '50%' }}
-                ></div>
-                <svg
-                  className="absolute inset-0 h-full w-full overflow-visible"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  {pageData.map((d, i) => {
-                    const disc =
-                      d.discrepancy !== undefined
-                        ? d.discrepancy
-                        : d.actualExpense !== undefined
-                        ? d.actualExpense - d.expTotal
-                        : 0;
-                    const rate = (disc / (d.income || 1)) * 100;
-                    const x = getLeftPercent(i);
-                    const y = 50 - (rate / maxDiscrepancyRate) * 40;
-                    const color = disc > 0 ? '#ef4444' : '#3b82f6';
-                    return (
-                      <g key={i}>
-                        <line
-                          x1={x}
-                          y1="50"
-                          x2={x}
-                          y2={y}
-                          stroke={color}
-                          strokeWidth="3"
-                        />
-                        <circle cx={x} cy={y} r="2.5" fill={color} />
-                        <text
-                          x={x}
-                          y={y > 50 ? y + 10 : y - 5}
-                          fontSize="8"
-                          fill={color}
-                          textAnchor="middle"
-                          fontWeight="bold"
-                        >
-                          {rate.toFixed(0)}%
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-              <div className="relative w-full mt-3 h-4">
-                {pageData.map((d, i) => {
-                  let shortLabel = d.label
-                    .replace('年 ', '/')
-                    .replace('月分', '')
-                    .replace('第', 'w')
-                    .replace('週', '');
-                  return (
+
+              <div className="relative mt-4 pl-8 pr-4">
+                {/* Y軸ラベル */}
+                <div className="absolute left-0 top-0 bottom-0 w-7 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
+                  <span className="translate-y-[-50%]">
+                    {maxDiscrepancyRate.toFixed(0)}%
+                  </span>
+                  <span className="translate-y-[-50%]">0%</span>
+                  <span className="translate-y-[50%]">
+                    -{maxDiscrepancyRate.toFixed(0)}%
+                  </span>
+                </div>
+
+                {/* グラフ領域 */}
+                <div className="relative w-full h-24 border-l-2 border-stone-800">
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '0%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '25%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t-2 border-dashed border-stone-400"
+                    style={{ top: '50%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '75%' }}
+                  ></div>
+                  <div
+                    className="absolute w-full border-t border-stone-200"
+                    style={{ top: '100%' }}
+                  ></div>
+
+                  {/* 【修正】文字と線が被らない、スタイリッシュなゼロ基準の棒グラフ */}
+                  <svg
+                    className="absolute inset-0 h-full w-full overflow-visible"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    {pageData.map((d, i) => {
+                      const disc =
+                        d.discrepancy !== undefined
+                          ? d.discrepancy
+                          : d.actualExpense !== undefined
+                          ? d.actualExpense - d.expTotal
+                          : 0;
+                      const rate = (disc / (d.income || 1)) * 100;
+                      const x = getLeftPercent(i);
+                      // 0%がy=50。rateがプラスなら上(y<50)へ、マイナスなら下(y>50)へ伸びる
+                      const barHeight =
+                        (Math.abs(rate) / maxDiscrepancyRate) * 50;
+                      const yTop = rate > 0 ? 50 - barHeight : 50;
+                      const color = rate > 0 ? '#ef4444' : '#3b82f6';
+
+                      return (
+                        <g key={i}>
+                          <rect
+                            x={x - 1.5}
+                            y={yTop}
+                            width="3"
+                            height={barHeight || 0.5}
+                            fill={color}
+                            rx="1"
+                          />
+                          <text
+                            x={x}
+                            y={rate > 0 ? yTop - 3 : 50 + barHeight + 7}
+                            fontSize="6"
+                            fill={color}
+                            textAnchor="middle"
+                            fontWeight="bold"
+                          >
+                            {rate.toFixed(0)}%
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+
+                {/* X軸ラベル */}
+                <div className="relative w-full h-4 mt-1">
+                  {pageData.map((d, i) => (
                     <span
                       key={i}
-                      className="absolute text-[8px] sm:text-[10px] text-stone-600 font-bold"
+                      className="absolute text-[6px] sm:text-[8px] text-stone-500"
                       style={{
                         left: `${getLeftPercent(i)}%`,
                         transform: 'translateX(-50%)',
-                        whiteSpace: 'nowrap',
                       }}
                     >
-                      {shortLabel}
+                      {shortLabel(d)}
                     </span>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* データテーブル */}
             <div className="border-2 border-stone-800 bg-white p-3 rounded-lg overflow-x-auto">
-              {/* 【修正】単位を「万円」に変更 */}
               <h3 className="text-sm font-bold mb-2">
                 ■ データテーブル (単位: 万円)
               </h3>
@@ -1597,9 +1729,6 @@ export default function App() {
                       </td>
                       {Array.from({ length: dataLen }).map((_, i) => {
                         const d = pageData[i];
-                        {
-                          /* 【修正】各セルの値を万円単位にフォーマット */
-                        }
                         const val = d
                           ? formatToMan(row.isExp ? d.exp[row.key] : d[row.key])
                           : '';
@@ -1612,7 +1741,6 @@ export default function App() {
                           </td>
                         );
                       })}
-                      {/* 【修正】前半計・後半計も万円単位にフォーマット */}
                       <td className="py-2 px-2 border-r border-stone-400 bg-stone-100 font-bold whitespace-nowrap">
                         {['totalAssets', 'loan', 'pureAssets'].includes(row.key)
                           ? '-'

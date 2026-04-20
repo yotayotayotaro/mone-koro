@@ -1179,10 +1179,10 @@ export default function App() {
     10
   );
 
-  // 【修正】グラフ上の絶対位置(left%)を計算。両端が枠（Y軸）に被らないよう、各データセルの中央に配置
+  // グラフ上の絶対位置(left%)を計算。両端が枠（Y軸）に被らないよう、各データセルの中央に配置
   const getLeftPercent = (i) => ((i + 0.5) / Math.max(dataLen, 1)) * 100;
 
-  // 【修正】ピックアップラベル・X軸ラベルの配置スタイル（端のはみ出し防止）
+  // ピックアップラベル・X軸ラベルの配置スタイル（端のはみ出し防止）
   const getLabelStyle = (i) => {
     if (i === 0) return { left: '0%', transform: 'translateX(0)' };
     if (i === dataLen - 1)
@@ -1264,29 +1264,27 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="relative h-10 w-full mb-1 px-8 sm:px-10">
-                <div className="relative w-full h-full">
-                  {uniqueTargetIndices.map((i) => {
-                    const d = pageData[i];
-                    return (
-                      <div
-                        key={i}
-                        className="absolute flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap w-16 sm:w-20"
-                        style={getLabelStyle(i)}
-                      >
-                        <span className="text-[8px] text-stone-500 font-bold mb-0.5">
-                          {shortLabel(d)}
-                        </span>
-                        <span className="text-[10px] text-green-600 font-bold leading-none">
-                          {Math.round(d.totalAssets / 1000).toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-blue-600 font-bold leading-none mt-0.5">
-                          {Math.round(d.pureAssets / 1000).toLocaleString()}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+              {/* 【修正】絶対配置(absolute)をやめ、Flexboxで3つを均等に並べて重なりを防止 */}
+              <div className="flex justify-between w-full mb-1 px-4 sm:px-6 gap-1">
+                {uniqueTargetIndices.map((i) => {
+                  const d = pageData[i];
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap flex-1 max-w-[32%] overflow-hidden"
+                    >
+                      <span className="text-[7px] sm:text-[8px] text-stone-500 font-bold mb-0.5 truncate">
+                        {shortLabel(d)}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-green-600 font-bold leading-none truncate">
+                        {Math.round(d.totalAssets / 1000).toLocaleString()}
+                      </span>
+                      <span className="text-[9px] sm:text-[10px] text-blue-600 font-bold leading-none mt-0.5 truncate">
+                        {Math.round(d.pureAssets / 1000).toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="relative mt-2 px-8 sm:px-10">
@@ -1405,43 +1403,41 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="relative h-20 w-full mb-2 px-8 sm:px-10">
-                <div className="relative w-full h-full">
-                  {uniqueTargetIndices.map((i) => {
-                    const d = pageData[i];
-                    return (
-                      <div
-                        key={i}
-                        className="absolute flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap w-20 sm:w-24"
-                        style={getLabelStyle(i)}
-                      >
-                        <span className="text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center">
-                          {shortLabel(d)}
+              {/* 【修正】絶対配置(absolute)をやめ、Flexboxで3つを均等に並べて重なりを防止 */}
+              <div className="flex justify-between w-full mb-2 px-4 sm:px-6 gap-1">
+                {uniqueTargetIndices.map((i) => {
+                  const d = pageData[i];
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap flex-1 max-w-[32%] overflow-hidden"
+                    >
+                      <span className="text-[7px] sm:text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center truncate">
+                        {shortLabel(d)}
+                      </span>
+                      <span className="text-[8px] sm:text-[9px] font-black text-center mb-0.5 truncate">
+                        計: {Math.round(d.expTotal / 1000).toLocaleString()}
+                      </span>
+                      <div className="grid grid-cols-2 gap-x-0.5 text-[6.5px] sm:text-[7.5px] font-bold leading-tight text-center">
+                        <span className="text-orange-600 truncate">
+                          食:{Math.round(d.exp.food / 1000)}
                         </span>
-                        <span className="text-[9px] font-black text-center mb-0.5">
-                          計: {Math.round(d.expTotal / 1000).toLocaleString()}
+                        <span className="text-blue-600 truncate">
+                          日:{Math.round(d.exp.daily / 1000)}
                         </span>
-                        <div className="grid grid-cols-2 gap-x-2 text-[8px] font-bold leading-tight">
-                          <span className="text-orange-600">
-                            食:{Math.round(d.exp.food / 1000)}
-                          </span>
-                          <span className="text-blue-600">
-                            日:{Math.round(d.exp.daily / 1000)}
-                          </span>
-                          <span className="text-purple-600">
-                            趣:{Math.round(d.exp.hobby / 1000)}
-                          </span>
-                          <span className="text-green-600">
-                            固:{Math.round(d.exp.fixed / 1000)}
-                          </span>
-                          <span className="text-yellow-600 col-span-2 text-center">
-                            他:{Math.round(d.exp.others / 1000)}
-                          </span>
-                        </div>
+                        <span className="text-purple-600 truncate">
+                          趣:{Math.round(d.exp.hobby / 1000)}
+                        </span>
+                        <span className="text-green-600 truncate">
+                          固:{Math.round(d.exp.fixed / 1000)}
+                        </span>
+                        <span className="text-yellow-600 col-span-2 truncate">
+                          他:{Math.round(d.exp.others / 1000)}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="relative mt-2 px-8 sm:px-10">

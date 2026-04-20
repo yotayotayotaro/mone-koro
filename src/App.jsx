@@ -28,10 +28,8 @@ const CHAR_AA_EGG = [
   '        ',
 ];
 
-// ベースの形（透過部分はスペース）
 const AA_BASES = [
   [
-    // スライム型
     '        ',
     '        ',
     '   ▄▄   ',
@@ -42,7 +40,6 @@ const AA_BASES = [
     '        ',
   ],
   [
-    // まる型
     '        ',
     '  ▄▄▄▄  ',
     ' ▄████▄ ',
@@ -53,7 +50,6 @@ const AA_BASES = [
     '        ',
   ],
   [
-    // しかく型
     '        ',
     ' ▄▄▄▄▄▄ ',
     ' ██████ ',
@@ -65,7 +61,6 @@ const AA_BASES = [
   ],
 ];
 
-// 重ね合わせるパーツ群
 const AA_PARTS = {
   eyes: [
     [
@@ -77,7 +72,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ノーマル
+    ],
     [
       '        ',
       '        ',
@@ -87,7 +82,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ぐるぐる
+    ],
     [
       '        ',
       '        ',
@@ -97,7 +92,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ＞＜
+    ],
     [
       '        ',
       '        ',
@@ -107,7 +102,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // 泣き
+    ],
     [
       '        ',
       '        ',
@@ -117,7 +112,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // にっこり
+    ],
   ],
   mouths: [
     [
@@ -129,7 +124,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // おちょぼ
+    ],
     [
       '        ',
       '        ',
@@ -139,7 +134,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // 開け
+    ],
     [
       '        ',
       '        ',
@@ -149,7 +144,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ギザギザ
+    ],
     [
       '        ',
       '        ',
@@ -159,7 +154,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ω
+    ],
     [
       '        ',
       '        ',
@@ -169,7 +164,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // むっ
+    ],
   ],
   decors: [
     [
@@ -181,7 +176,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // 天使の輪
+    ],
     [
       '        ',
       '        ',
@@ -191,7 +186,7 @@ const AA_PARTS = {
       '        ',
       '  ▄  ▄  ',
       '  ▀  ▀  ',
-    ], // ちいさな足
+    ],
     [
       ' ▄    ▄ ',
       ' █    █ ',
@@ -201,7 +196,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ツノ
+    ],
     [
       '        ',
       '        ',
@@ -211,7 +206,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // 小さな羽
+    ],
     [
       '        ',
       '   ||   ',
@@ -221,7 +216,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // ちょんまげ
+    ],
     [
       '        ',
       '        ',
@@ -231,7 +226,7 @@ const AA_PARTS = {
       '        ',
       '  ◎  ◎  ',
       '  ▀  ▀  ',
-    ], // タイヤ
+    ],
     [
       ' █▀█▀█  ',
       ' ▀████▀ ',
@@ -241,7 +236,7 @@ const AA_PARTS = {
       '        ',
       '        ',
       '        ',
-    ], // 王冠
+    ],
     [
       '        ',
       '        ',
@@ -251,10 +246,9 @@ const AA_PARTS = {
       '        ',
       '  ~~  ~~',
       '        ',
-    ], // 浮遊
+    ],
   ],
   auras: [
-    // ズレが大きい（浪費）時につく闇オーラ
     [
       ' ░░░░░░ ',
       '░      ░',
@@ -278,7 +272,6 @@ const AA_PARTS = {
   ],
 };
 
-// 重ね合わせ関数（baseの文字をpartの文字で上書きする。スペースは透過）
 const overlayAA = (base, part) => {
   if (!part) return base;
   return base.map((line, i) => {
@@ -296,8 +289,6 @@ export default function App() {
   const [step, setStep] = useState('home');
   const [showSaveIcon, setShowSaveIcon] = useState(false);
   const [currentPeriod, setCurrentPeriod] = useState(null);
-
-  // ウィザードの「戻る」ボタン用の履歴ステート
   const [stepHistory, setStepHistory] = useState([]);
 
   // --- 状態管理 ---
@@ -305,17 +296,14 @@ export default function App() {
     const saved = localStorage.getItem('manekoro_settings');
     return saved ? JSON.parse(saved) : { periodType: 'month' };
   });
-
   const [periods, setPeriods] = useState(() => {
     const saved = localStorage.getItem('manekoro_periods');
     return saved ? JSON.parse(saved) : [];
   });
-
   const [savedData, setSavedData] = useState(() => {
     const saved = localStorage.getItem('manekoro_savedData');
     return saved ? JSON.parse(saved) : {};
   });
-
   const [finance, setFinance] = useState(() => {
     const saved = localStorage.getItem('manekoro_finance');
     return saved
@@ -334,7 +322,6 @@ export default function App() {
           secProfit: 0,
         };
   });
-
   const [character, setCharacter] = useState(() => {
     const saved = localStorage.getItem('manekoro_character');
     return saved
@@ -352,7 +339,6 @@ export default function App() {
           lastRate: 0,
         };
   });
-
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem('manekoro_history');
     return saved ? JSON.parse(saved) : [];
@@ -360,22 +346,17 @@ export default function App() {
 
   const [inputs, setInputs] = useState({ banks: [] });
   const [currentBankInput, setCurrentBankInput] = useState('');
-
-  // 分析ページのページネーション（0が最新のページ）
   const [analyticsPage, setAnalyticsPage] = useState(0);
 
-  // boolean選択・フォーカス用のStateとRef
   const [boolSelection, setBoolSelection] = useState(true);
   const boolContainerRef = useRef(null);
   const introContainerRef = useRef(null);
 
-  // 初回追加用のState
   const currentYear = new Date().getFullYear();
   const [initYear, setInitYear] = useState(String(currentYear));
   const [initMonth, setInitMonth] = useState(String(new Date().getMonth() + 1));
   const [initWeek, setInitWeek] = useState('1');
 
-  // --- 保存処理 ---
   useEffect(() => {
     localStorage.setItem('manekoro_settings', JSON.stringify(userSettings));
   }, [userSettings]);
@@ -395,7 +376,6 @@ export default function App() {
     localStorage.setItem('manekoro_savedData', JSON.stringify(savedData));
   }, [savedData]);
 
-  // 入力画面に入ったとき、自動でフォーカスを当ててキー操作を可能にする
   useEffect(() => {
     if (['ask_bank', 'ask_securities', 'ask_loan'].includes(step)) {
       setBoolSelection(true);
@@ -411,7 +391,6 @@ export default function App() {
   }, [step]);
 
   useEffect(() => {
-    // バグ修正: 'settings', 'help' 画面にいる時も保存対象から除外する
     const isRecording =
       currentPeriod &&
       ![
@@ -446,7 +425,6 @@ export default function App() {
     }
   };
 
-  // --- バックアップ・引き継ぎ処理 ---
   const handleExportData = () => {
     const dataToExport = {
       manekoro_settings: localStorage.getItem('manekoro_settings'),
@@ -470,7 +448,6 @@ export default function App() {
   const handleImportData = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -505,7 +482,6 @@ export default function App() {
             'manekoro_history',
             importedData.manekoro_history
           );
-
         alert('データを復元しました！アプリを再起動します。');
         window.location.reload();
       } catch (error) {
@@ -527,7 +503,6 @@ export default function App() {
     }
   };
 
-  // --- 期間の追加処理 ---
   const handleAddInitPeriod = () => {
     const isMonth = userSettings.periodType === 'month';
     const mm = initMonth.padStart(2, '0');
@@ -540,25 +515,21 @@ export default function App() {
     const days = isMonth
       ? new Date(parseInt(initYear), parseInt(initMonth), 0).getDate()
       : 7;
-
-    if (!periods.some((p) => p.id === id)) {
+    if (!periods.some((p) => p.id === id))
       setPeriods([
         { id, label, type: userSettings.periodType, days },
         ...periods,
       ]);
-    }
   };
 
   const handleAddNextPeriod = () => {
     const currentType = userSettings.periodType;
     const filteredPeriods = periods.filter((p) => p.type === currentType);
     if (filteredPeriods.length === 0) return;
-
     const latestPeriod = [...filteredPeriods].sort((a, b) =>
       b.id.localeCompare(a.id)
     )[0];
     let nextId, nextLabel, nextDays;
-
     if (currentType === 'month') {
       const match = latestPeriod.id.match(/^(\d{4})-(\d{2})-m$/);
       if (match) {
@@ -595,7 +566,6 @@ export default function App() {
         nextDays = 7;
       }
     }
-
     if (nextId && !periods.some((p) => p.id === nextId)) {
       setPeriods([
         { id: nextId, label: nextLabel, type: currentType, days: nextDays },
@@ -606,10 +576,8 @@ export default function App() {
 
   const handleSelectPeriod = (period) => {
     setCurrentPeriod(period);
-    setStepHistory(['select_period']); // 履歴を初期化してセット
+    setStepHistory(['select_period']);
     const data = savedData[period.id];
-
-    // バグ修正: もし既にバグで 'settings' や 'help' が保存されてしまっていた場合は無視して最初から始める
     if (
       data &&
       data.status === 'in_progress' &&
@@ -620,11 +588,8 @@ export default function App() {
       setStep(data.step);
     } else {
       setInputs(data?.inputs || { banks: [] });
-      if (finance.previousAssets === null) {
-        setStep('intro_start'); // 初回のみスタート時残高入力へ
-      } else {
-        setStep('intro_current'); // 2回目以降は現在の残高入力から
-      }
+      if (finance.previousAssets === null) setStep('intro_start');
+      else setStep('intro_current');
     }
   };
 
@@ -636,8 +601,6 @@ export default function App() {
     if (stepHistory.length > 0) {
       const newHistory = [...stepHistory];
       const prevStep = newHistory.pop();
-
-      // 銀行入力から戻った場合、追加された最後の銀行を取り出して再編集できるようにする
       if (prevStep === 'bank_input') {
         setInputs((prev) => {
           const newBanks = [...(prev.banks || [])];
@@ -646,23 +609,18 @@ export default function App() {
           return { ...prev, banks: newBanks };
         });
       }
-
-      // 入力途中で戻った場合は入力中の数字をクリアする
-      if (step === 'bank_input') {
-        setCurrentBankInput('');
-      }
-
+      if (step === 'bank_input') setCurrentBankInput('');
       setStepHistory(newHistory);
       setStep(prevStep);
     } else {
-      setStep('select_period'); // 履歴がなければ一覧へ戻る
+      setStep('select_period');
     }
   };
 
   const handleCancelWizard = () => {
     setStepHistory([]);
     setStep('home');
-    setCurrentPeriod(null); // バグ修正: 裏側で期間が選択されたままになるのを防ぐ
+    setCurrentPeriod(null);
   };
 
   const handleNextStep = (currentStep, overrideValue = null) => {
@@ -674,7 +632,6 @@ export default function App() {
         return setStep('initial_loan');
       case 'initial_loan':
         return setStep('intro_current');
-
       case 'intro_current':
         return setStep('cash');
       case 'cash':
@@ -702,7 +659,6 @@ export default function App() {
         return overrideValue ? setStep('loan') : setStep('intro_sense');
       case 'loan':
         return setStep('intro_sense');
-
       case 'intro_sense':
         return setStep('income');
       case 'income':
@@ -733,11 +689,8 @@ export default function App() {
       : 0;
     const loan = inputs.hasLoan ? Number(inputs.loan) || 0 : 0;
     const income = Number(inputs.income) || 0;
-
     const currentPureAssets = cash + banksTotal + securities - loan;
     const assetsWithoutProfit = currentPureAssets - secProfit;
-
-    // startAssets は、記録の履歴が1つもない（最初の記録）時の、実際の純資産とする。
     const isFirstRecord = history.length === 0;
     const startAssets =
       finance.startAssets !== null && !isFirstRecord
@@ -745,25 +698,16 @@ export default function App() {
         : currentPureAssets;
     const prevAssets =
       finance.previousAssets !== null ? finance.previousAssets : startAssets;
-
-    // 実際ノ収支差（前回からの増減）
     const actualBalance = assetsWithoutProfit - prevAssets;
-
     const expFood = Number(inputs.expFood) || 0;
     const expDaily = Number(inputs.expDaily) || 0;
     const expHobby = Number(inputs.expHobby) || 0;
     const expFixed = Number(inputs.expFixed) || 0;
     const expOthers = Number(inputs.expOthers) || 0;
-
     const senseExpenseTotal =
       expFood + expDaily + expHobby + expFixed + expOthers;
-
-    // カンカク収支差（収入 - 感覚の支出）
     const senseBalance = income - senseExpenseTotal;
-
-    // ズレ（カンカクでは増えるはずだった額 - 実際に増えた額）
     const discrepancy = senseBalance - actualBalance;
-
     const tolerance = income > 0 ? Math.floor(income * 0.03) : 5000;
     const isGood = Math.abs(discrepancy) <= tolerance;
 
@@ -777,12 +721,11 @@ export default function App() {
       income,
       tolerance,
       isGood,
-      startAssets: startAssets,
+      startAssets,
       previousAssets: prevAssets,
       secProfit,
     }));
 
-    // history に詳細データを保存
     const newRecord = {
       id: currentPeriod.id,
       label: currentPeriod.label,
@@ -808,7 +751,6 @@ export default function App() {
       const filtered = prev.filter((h) => h.id !== currentPeriod.id);
       return [...filtered, newRecord].sort((a, b) => a.id.localeCompare(b.id));
     });
-
     setSavedData((prev) => ({
       ...prev,
       [currentPeriod.id]: { status: 'completed', step: 'result', inputs },
@@ -819,23 +761,16 @@ export default function App() {
   const handleEvolution = () => {
     let newChar = { ...character };
     let nextEvent = null;
-
-    // --- 1. 純資産の伸びによるレベルと巨大化計算 ---
     const growthAmount = finance.currentAssets - finance.startAssets;
-
-    // 5万円増えるごとにLv1アップ。マイナスになってもLv1を下限とする。
     const newLevel = Math.max(1, 1 + Math.floor(growthAmount / 50000));
-
-    // 最大レベルを16段階としてスケール計算。Lv1で1.0、Lv16で最大約3.0
     const displayLevel = Math.min(newLevel, 16);
-    const newScale = 1.0 + (displayLevel - 1) * 0.133;
+
+    const newScale = 1.0 + (displayLevel - 1) * 0.08;
 
     newChar.level = newLevel;
     newChar.sizeScale = newScale;
 
-    // --- 2. 進化（パーツ追加）の計算 ---
     if (newChar.stage === 0) {
-      // 初回（タマゴからの孵化）
       newChar.stage = 1;
       newChar.baseIdx = Math.floor(Math.random() * AA_BASES.length);
       newChar.parts = [];
@@ -845,63 +780,42 @@ export default function App() {
       newChar.lastRate = 0;
       nextEvent = 'hatch';
     } else {
-      // 今回のズレ率（誤差）を計算
       const rate = Math.abs(finance.discrepancy) / (finance.income || 1);
-
       let baseEP = 0;
-      if (rate <= 0.01) {
-        baseEP = 3; // 誤差1%以内
-      } else if (rate <= 0.03) {
-        baseEP = 1; // 誤差3%以内
-      }
-
-      // 【複利の教訓】ベースEP × 純資産レベル ＝ 獲得EP！
+      if (rate <= 0.01) baseEP = 3;
+      else if (rate <= 0.03) baseEP = 1;
       const earnedEP = baseEP * newLevel;
       newChar.evolutionPoint = (newChar.evolutionPoint || 0) + earnedEP;
       newChar.lastEarnedEP = earnedEP;
       newChar.lastRate = rate;
 
       if (rate > 0.03) {
-        // 誤差3%超はペナルティ
         newChar.hasAura = true;
         nextEvent = 'devolve';
       } else {
         newChar.hasAura = false;
-
-        // 10EP貯まるごとにパーツが1つ追加される
         const EVOLUTION_THRESHOLD = 10;
         let evolvedCount = 0;
-
         while (newChar.evolutionPoint >= EVOLUTION_THRESHOLD) {
           newChar.evolutionPoint -= EVOLUTION_THRESHOLD;
           evolvedCount++;
-
-          // パーツをランダムに追加
           const partTypes = ['eyes', 'mouths', 'decors'];
           const type = partTypes[Math.floor(Math.random() * partTypes.length)];
           const idx = Math.floor(Math.random() * AA_PARTS[type].length);
           if (!newChar.parts) newChar.parts = [];
           newChar.parts.push({ type, idx });
         }
-
-        if (evolvedCount > 0) {
-          nextEvent = 'evolve';
-        } else {
-          nextEvent = 'stay';
-        }
+        if (evolvedCount > 0) nextEvent = 'evolve';
+        else nextEvent = 'stay';
       }
     }
-
     newChar.lastEvent = nextEvent;
-
     setCharacter(newChar);
     setFinance((prev) => ({ ...prev, previousAssets: prev.currentAssets }));
     setStep('evolution');
   };
 
-  // --- アンコントローラブルなAAの合成と描画 ---
   const renderAA = (charState) => {
-    // 0. タマゴ
     if (charState.stage === 0) {
       return (
         <div className="flex justify-center items-center h-48 sm:h-64 transition-transform duration-1000">
@@ -913,29 +827,20 @@ export default function App() {
         </div>
       );
     }
-
-    // 1. ベースの形を取得
     let resultAA = [...AA_BASES[charState.baseIdx || 0]];
-
-    // 2. 獲得したパーツを順番に重ね合わせる
     (charState.parts || []).forEach((p) => {
       const partAA = AA_PARTS[p.type][p.idx];
       resultAA = overlayAA(resultAA, partAA);
     });
-
-    // 3. 闇オーラがあれば重ねる
     if (charState.hasAura) {
       const auraAA =
         AA_PARTS.auras[Math.floor(Math.random() * AA_PARTS.auras.length)];
       resultAA = overlayAA(resultAA, auraAA);
     }
-
-    // CSSの transform: scale() を使って巨大化を表現
     const scaleStyle = {
       transform: `scale(${charState.sizeScale || 1.0})`,
       transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
     };
-
     return (
       <div className="flex justify-center items-center h-48 sm:h-64 relative overflow-visible pointer-events-none opacity-90">
         <div
@@ -950,7 +855,6 @@ export default function App() {
     );
   };
 
-  // ウィザード用ヘッダーコンポーネント（戻る・中断）
   const renderWizardHeader = () => (
     <div className="flex justify-between items-center mb-6 border-b-2 border-transparent shrink-0">
       <button
@@ -968,7 +872,6 @@ export default function App() {
     </div>
   );
 
-  // 案内画面（クッションページ）のコンポーネント
   const renderIntroScreen = ({ title, desc }) => {
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
@@ -976,7 +879,6 @@ export default function App() {
         handleNextStep(step);
       }
     };
-
     return (
       <div
         className="flex flex-col h-full justify-start pt-6 px-4 animate-fade-in relative pb-10 outline-none"
@@ -1018,7 +920,6 @@ export default function App() {
         handleNextStep(step);
       }
     };
-
     if (type === 'boolean') {
       const handleBoolKeyDown = (e) => {
         if (e.key === 'ArrowLeft' || e.key === '4') {
@@ -1033,7 +934,6 @@ export default function App() {
           handleNextStep(step, boolSelection);
         }
       };
-
       return (
         <div
           className="flex flex-col h-full justify-start pt-6 px-4 animate-fade-in relative pb-10 outline-none"
@@ -1051,7 +951,6 @@ export default function App() {
               {desc}
             </p>
           )}
-
           <div className="flex gap-4 mt-8 shrink-0">
             <button
               onClick={() => {
@@ -1088,7 +987,6 @@ export default function App() {
         </div>
       );
     }
-
     return (
       <div
         className="flex flex-col h-full justify-start pt-6 px-4 animate-fade-in relative pb-10"
@@ -1103,7 +1001,6 @@ export default function App() {
             {desc}
           </p>
         )}
-
         <div className="mt-4 shrink-0">
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-xl">
@@ -1135,19 +1032,16 @@ export default function App() {
     const total = inputs.expFoodTotal || '';
     const days = currentPeriod.days;
     const calculatedTotal = daily ? Number(daily) * days : Number(total);
-
     const handleNext = () => {
       updateInput('expFood', calculatedTotal);
       handleNextStep('expFood');
     };
-
     const handleKeyDown = (e) => {
       if (e.key === 'Enter' && calculatedTotal) {
         e.preventDefault();
         handleNext();
       }
     };
-
     return (
       <div
         className="flex flex-col h-full justify-start pt-6 px-4 animate-fade-in relative pb-10"
@@ -1160,7 +1054,6 @@ export default function App() {
         <p className="text-sm text-stone-600 mb-4 font-mono shrink-0">
           1日あたり、または合計を入力
         </p>
-
         <div className="bg-stone-100 border-2 border-stone-800 p-4 mb-2 rounded-lg shrink-0">
           <p className="text-sm font-bold mb-2 text-stone-700">
             ★ 1日およそいくら？（優先）
@@ -1221,42 +1114,29 @@ export default function App() {
     );
   };
 
-  const displayPeriods = periods.filter(
-    (p) => p.type === userSettings.periodType
-  );
   const displayHistory = history.filter(
     (h) => h.type === userSettings.periodType
   );
-
-  // --- 手帳風（13枠固定・左詰め）のページネーション・データ構築 ---
+  const displayPeriods = periods.filter(
+    (p) => p.type === userSettings.periodType
+  );
   const ITEMS_PER_PAGE = 13;
-
-  // 記録を古い順にソートする (historyは id (例: 2026-04-m) でソート済み前提)
   const sortedHistory = [...displayHistory].sort((a, b) =>
     a.id.localeCompare(b.id)
   );
-
-  // 13件ずつチャンク（ページ）に分割する
   const chunks = [];
   for (let i = 0; i < sortedHistory.length; i += ITEMS_PER_PAGE) {
     chunks.push(sortedHistory.slice(i, i + ITEMS_PER_PAGE));
   }
-
-  // chunks配列を逆順にして、新しいチャンクを 0 番目にする
   const reversedChunks = [...chunks].reverse();
   const maxPage = Math.max(0, reversedChunks.length - 1);
-
-  // 現在表示するページのデータ（最大13件、左詰め）
   const pageData = reversedChunks[analyticsPage] || [];
-
-  // 前半計(1〜7件目)・後半計(8〜13件目)の計算用
   const prevHalf = pageData.slice(0, 7);
   const recentHalf = pageData.slice(7, 13);
 
   const sumKey = (arr, key) => arr.reduce((acc, curr) => acc + curr[key], 0);
   const sumExp = (arr, key) =>
     arr.reduce((acc, curr) => acc + curr.exp[key], 0);
-
   const calcTotals = (arr) => ({
     income: sumKey(arr, 'income'),
     expTotal: sumKey(arr, 'expTotal'),
@@ -1268,17 +1148,22 @@ export default function App() {
       others: sumExp(arr, 'others'),
     },
   });
-
   const prevTotals = calcTotals(prevHalf);
   const recentTotals = calcTotals(recentHalf);
+
+  const dataLen = pageData.length;
+  const startIndex = 0;
+  const midIndex = Math.floor((dataLen - 1) / 2);
+  const lastIndex = Math.max(0, dataLen - 1);
+  const uniqueTargetIndices = [
+    ...new Set([startIndex, midIndex, lastIndex]),
+  ].sort((a, b) => a - b);
 
   const maxAssets = Math.max(...pageData.map((d) => d.totalAssets), 1);
   const minAssets = Math.min(...pageData.map((d) => d.pureAssets), 0);
   const assetRange = maxAssets - minAssets || 1;
   const maxExp = Math.max(...pageData.map((d) => d.expTotal), 1);
-
   const getAssetY = (val) => 100 - ((val - minAssets) / assetRange) * 100;
-
   const maxDiscrepancyRate = Math.max(
     ...pageData.map((d) => {
       const disc =
@@ -1291,6 +1176,21 @@ export default function App() {
     }),
     10
   );
+
+  const getLeftPercent = (i) => (i / Math.max(dataLen - 1, 1)) * 100;
+  const getTransform = (i) => {
+    if (i === 0) return 'translateX(0)';
+    if (i === dataLen - 1) return 'translateX(-100%)';
+    return 'translateX(-50%)';
+  };
+
+  // --- 数値を「万円単位 (小数第1位)」でフォーマットする関数 ---
+  const formatToMan = (val) => {
+    if (val === 0) return '0';
+    const man = val / 10000;
+    // 小数第1位まで表示（ピッタリの時は整数のみ）
+    return Number.isInteger(man) ? man.toLocaleString() : man.toFixed(1);
+  };
 
   const renderAnalytics = () => {
     if (displayHistory.length === 0) {
@@ -1305,14 +1205,12 @@ export default function App() {
 
     return (
       <div className="flex flex-col min-h-full animate-fade-in text-stone-800 relative pb-10">
-        {/* ページネーション・ヘッダー */}
         <div className="flex justify-between items-center mb-4 shrink-0">
           <h2 className="text-xl font-bold border-b-2 border-stone-800 pb-1">
             ダッシュボード
           </h2>
           {maxPage > 0 && (
             <div className="flex items-center gap-2">
-              {/* 最新へ戻る (analyticsPage を減らす) */}
               <button
                 disabled={analyticsPage === 0}
                 onClick={() => setAnalyticsPage((p) => p - 1)}
@@ -1324,7 +1222,6 @@ export default function App() {
                 {analyticsPage === 0 ? '最新' : `過去 ${analyticsPage}`} (
                 {analyticsPage + 1}/{maxPage + 1})
               </span>
-              {/* 過去へ進む (analyticsPage を増やす) */}
               <button
                 disabled={analyticsPage >= maxPage}
                 onClick={() => setAnalyticsPage((p) => p + 1)}
@@ -1335,20 +1232,16 @@ export default function App() {
             </div>
           )}
         </div>
-        <p className="text-[10px] text-stone-600 mb-2 font-bold shrink-0">
-          ※グラフと表は横にスクロールできます
-        </p>
 
-        <div className="overflow-x-auto pb-2 flex-1">
-          {/* 13枠固定の広々としたレイアウトを強制する (min-w-[650px]) */}
-          <div className="space-y-4 pr-4" style={{ minWidth: '650px' }}>
+        <div className="overflow-x-hidden pb-2 flex-1">
+          <div className="space-y-6">
             {/* 資産推移 */}
-            <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
+            <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-2 border-b border-stone-200 pb-2">
                 <h3 className="text-sm font-bold">
                   ■ 資産推移 (総資産 / 純資産)
                 </h3>
-                <div className="flex gap-4 text-xs font-bold">
+                <div className="flex gap-3 text-[10px] font-bold">
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-1 bg-green-500"></div> 総資産
                   </span>
@@ -1357,7 +1250,39 @@ export default function App() {
                   </span>
                 </div>
               </div>
-              <div className="relative h-40 w-full border-l-2 border-b-2 border-stone-800 mt-2">
+
+              <div className="relative h-10 w-full mb-1">
+                {uniqueTargetIndices.map((i) => {
+                  const d = pageData[i];
+                  return (
+                    <div
+                      key={i}
+                      className="absolute flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10"
+                      style={{
+                        left: `${getLeftPercent(i)}%`,
+                        transform: getTransform(i),
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span className="text-[8px] text-stone-500 font-bold mb-0.5">
+                        {d.label
+                          .replace('年 ', '/')
+                          .replace('月分', '')
+                          .replace('第', 'w')
+                          .replace('週', '')}
+                      </span>
+                      <span className="text-[10px] text-green-600 font-bold leading-none">
+                        {Math.round(d.totalAssets / 1000).toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-blue-600 font-bold leading-none mt-0.5">
+                        {Math.round(d.pureAssets / 1000).toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="relative h-32 w-full border-l-2 border-b-2 border-stone-800">
                 <svg
                   className="absolute inset-0 h-full w-full overflow-visible"
                   viewBox="0 0 100 100"
@@ -1369,7 +1294,7 @@ export default function App() {
                         points={pageData
                           .map(
                             (d, i) =>
-                              `${(i / 12) * 100},${getAssetY(d.totalAssets)}`
+                              `${getLeftPercent(i)},${getAssetY(d.totalAssets)}`
                           )
                           .join(' ')}
                         fill="none"
@@ -1380,7 +1305,7 @@ export default function App() {
                         points={pageData
                           .map(
                             (d, i) =>
-                              `${(i / 12) * 100},${getAssetY(d.pureAssets)}`
+                              `${getLeftPercent(i)},${getAssetY(d.pureAssets)}`
                           )
                           .join(' ')}
                         fill="none"
@@ -1393,15 +1318,15 @@ export default function App() {
                   {pageData.map((d, i) => (
                     <g key={i}>
                       <circle
-                        cx={(i / 12) * 100}
+                        cx={getLeftPercent(i)}
                         cy={getAssetY(d.totalAssets)}
-                        r="2"
+                        r="2.5"
                         fill="#22c55e"
                       />
                       <circle
-                        cx={(i / 12) * 100}
+                        cx={getLeftPercent(i)}
                         cy={getAssetY(d.pureAssets)}
-                        r="2"
+                        r="2.5"
                         fill="#3b82f6"
                       />
                     </g>
@@ -1410,23 +1335,71 @@ export default function App() {
               </div>
             </div>
 
-            {/* 支出内訳（13列のグリッドで等分配置） */}
-            <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-bold">■ 支出内訳推移</h3>
+            {/* 支出内訳推移 */}
+            <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
+              <div className="mb-2 border-b border-stone-200 pb-2">
+                <h3 className="text-sm font-bold mb-1">■ 支出内訳推移</h3>
                 <div className="flex gap-2 text-[10px] font-bold">
-                  <span className="text-orange-500">■食</span>
-                  <span className="text-blue-500">■日</span>
-                  <span className="text-purple-500">■趣</span>
-                  <span className="text-green-500">■固</span>
+                  <span className="text-orange-500">■食費</span>
+                  <span className="text-blue-500">■日用品</span>
+                  <span className="text-purple-500">■趣味</span>
+                  <span className="text-green-500">■固定</span>
                   <span className="text-yellow-500">■他</span>
                 </div>
               </div>
+
+              <div className="relative h-20 w-full mb-2">
+                {uniqueTargetIndices.map((i) => {
+                  const d = pageData[i];
+                  return (
+                    <div
+                      key={i}
+                      className="absolute flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10"
+                      style={{
+                        left: `${getLeftPercent(i)}%`,
+                        transform: getTransform(i),
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span className="text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center">
+                        {d.label
+                          .replace('年 ', '/')
+                          .replace('月分', '')
+                          .replace('第', 'w')
+                          .replace('週', '')}
+                      </span>
+                      <span className="text-[9px] font-black text-center mb-0.5">
+                        計: {Math.round(d.expTotal / 1000).toLocaleString()}
+                      </span>
+                      <div className="grid grid-cols-2 gap-x-2 text-[8px] font-bold leading-tight">
+                        <span className="text-orange-600">
+                          食:{Math.round(d.exp.food / 1000)}
+                        </span>
+                        <span className="text-blue-600">
+                          日:{Math.round(d.exp.daily / 1000)}
+                        </span>
+                        <span className="text-purple-600">
+                          趣:{Math.round(d.exp.hobby / 1000)}
+                        </span>
+                        <span className="text-green-600">
+                          固:{Math.round(d.exp.fixed / 1000)}
+                        </span>
+                        <span className="text-yellow-600 col-span-2 text-center">
+                          他:{Math.round(d.exp.others / 1000)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
               <div
-                className="relative h-40 w-full border-l-2 border-b-2 border-stone-800 mt-2 grid gap-1 px-1 items-end"
-                style={{ gridTemplateColumns: 'repeat(13, minmax(0, 1fr))' }}
+                className="relative h-32 w-full border-l-2 border-b-2 border-stone-800 grid gap-0.5 px-1 items-end"
+                style={{
+                  gridTemplateColumns: `repeat(${dataLen}, minmax(0, 1fr))`,
+                }}
               >
-                {Array.from({ length: 13 }).map((_, i) => {
+                {Array.from({ length: dataLen }).map((_, i) => {
                   const d = pageData[i];
                   if (!d)
                     return (
@@ -1434,7 +1407,7 @@ export default function App() {
                         key={i}
                         className="flex flex-col w-full h-full"
                       ></div>
-                    ); // 空枠
+                    );
                   return (
                     <div
                       key={i}
@@ -1478,14 +1451,14 @@ export default function App() {
             </div>
 
             {/* 差異率推移 */}
-            <div className="border-2 border-stone-800 bg-white p-3 rounded-lg shrink-0 mt-2">
+            <div className="border-2 border-stone-800 bg-white p-3 rounded-lg shrink-0">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-bold">■ 差異率推移</h3>
-                <span className="text-[10px] font-bold text-stone-500">
+                <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-1 rounded">
                   差額÷収入(%)
                 </span>
               </div>
-              <div className="relative h-20 w-full border-l-2 border-stone-800 mt-2">
+              <div className="relative h-24 w-full border-l-2 border-stone-800 mt-4">
                 <div
                   className="absolute w-full border-t-2 border-dashed border-stone-400"
                   style={{ top: '50%' }}
@@ -1503,7 +1476,7 @@ export default function App() {
                         ? d.actualExpense - d.expTotal
                         : 0;
                     const rate = (disc / (d.income || 1)) * 100;
-                    const x = (i / 12) * 100;
+                    const x = getLeftPercent(i);
                     const y = 50 - (rate / maxDiscrepancyRate) * 40;
                     const color = disc > 0 ? '#ef4444' : '#3b82f6';
                     return (
@@ -1516,28 +1489,35 @@ export default function App() {
                           stroke={color}
                           strokeWidth="3"
                         />
-                        <circle cx={x} cy={y} r="2" fill={color} />
+                        <circle cx={x} cy={y} r="2.5" fill={color} />
+                        <text
+                          x={x}
+                          y={y > 50 ? y + 10 : y - 5}
+                          fontSize="8"
+                          fill={color}
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          {rate.toFixed(0)}%
+                        </text>
                       </g>
                     );
                   })}
                 </svg>
               </div>
               <div className="relative w-full mt-3 h-4">
-                {Array.from({ length: 13 }).map((_, i) => {
-                  const d = pageData[i];
-                  let shortLabel = d
-                    ? d.label
-                        .replace('年 ', '/')
-                        .replace('月分', '')
-                        .replace('第', 'w')
-                        .replace('週', '')
-                    : '';
+                {pageData.map((d, i) => {
+                  let shortLabel = d.label
+                    .replace('年 ', '/')
+                    .replace('月分', '')
+                    .replace('第', 'w')
+                    .replace('週', '');
                   return (
                     <span
                       key={i}
                       className="absolute text-[8px] sm:text-[10px] text-stone-600 font-bold"
                       style={{
-                        left: `${(i / 12) * 100}%`,
+                        left: `${getLeftPercent(i)}%`,
                         transform: 'translateX(-50%)',
                         whiteSpace: 'nowrap',
                       }}
@@ -1549,18 +1529,23 @@ export default function App() {
               </div>
             </div>
 
-            {/* データテーブル（13枠固定） */}
-            <div className="border-2 border-stone-800 bg-white p-4 rounded-lg overflow-x-auto">
+            {/* データテーブル */}
+            <div className="border-2 border-stone-800 bg-white p-3 rounded-lg overflow-x-auto">
+              {/* 【修正】単位を「万円」に変更 */}
               <h3 className="text-sm font-bold mb-2">
-                ■ データテーブル (単位: 千円)
+                ■ データテーブル (単位: 万円)
               </h3>
-              <table className="w-full text-[10px] text-right border-collapse">
+              <p className="text-[10px] text-stone-500 mb-2 font-bold shrink-0">
+                ※表は横にスクロールできます
+              </p>
+
+              <table className="w-max text-[11px] text-right border-collapse">
                 <thead>
                   <tr className="bg-stone-200 border-b-2 border-stone-800">
-                    <th className="p-1 border-r border-stone-400 text-left w-16 sticky left-0 bg-stone-200">
+                    <th className="py-2 px-1 border-r border-stone-400 text-left w-16 sticky left-0 bg-stone-200 z-10 whitespace-nowrap">
                       項目
                     </th>
-                    {Array.from({ length: 13 }).map((_, i) => {
+                    {Array.from({ length: dataLen }).map((_, i) => {
                       const d = pageData[i];
                       let shortLabel = d
                         ? d.label
@@ -1572,16 +1557,16 @@ export default function App() {
                       return (
                         <th
                           key={i}
-                          className="p-1 border-r border-stone-300 font-normal min-w-[35px]"
+                          className="py-2 px-2 border-r border-stone-300 font-normal min-w-[50px] whitespace-nowrap"
                         >
                           {shortLabel}
                         </th>
                       );
                     })}
-                    <th className="p-1 border-r border-stone-400 bg-stone-300 font-bold min-w-[40px]">
+                    <th className="py-2 px-2 border-r border-stone-400 bg-stone-300 font-bold min-w-[50px] whitespace-nowrap">
                       前半計
                     </th>
-                    <th className="p-1 bg-stone-300 font-bold min-w-[40px]">
+                    <th className="py-2 px-2 bg-stone-300 font-bold min-w-[50px] whitespace-nowrap">
                       後半計
                     </th>
                   </tr>
@@ -1607,42 +1592,44 @@ export default function App() {
                           : ''
                       }`}
                     >
-                      <td className="p-1 border-r border-stone-400 text-left font-bold sticky left-0 bg-white shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
+                      <td className="py-2 px-1 border-r border-stone-400 text-left font-bold sticky left-0 bg-white shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)] whitespace-nowrap z-10">
                         {row.name}
                       </td>
-                      {Array.from({ length: 13 }).map((_, i) => {
+                      {Array.from({ length: dataLen }).map((_, i) => {
                         const d = pageData[i];
+                        {
+                          /* 【修正】各セルの値を万円単位にフォーマット */
+                        }
                         const val = d
-                          ? Math.round(
-                              (row.isExp ? d.exp[row.key] : d[row.key]) / 1000
-                            ).toLocaleString()
+                          ? formatToMan(row.isExp ? d.exp[row.key] : d[row.key])
                           : '';
                         return (
                           <td
                             key={i}
-                            className="p-1 border-r border-stone-300 text-stone-700"
+                            className="py-2 px-2 border-r border-stone-300 text-stone-700 whitespace-nowrap"
                           >
                             {val}
                           </td>
                         );
                       })}
-                      <td className="p-1 border-r border-stone-400 bg-stone-100 font-bold">
+                      {/* 【修正】前半計・後半計も万円単位にフォーマット */}
+                      <td className="py-2 px-2 border-r border-stone-400 bg-stone-100 font-bold whitespace-nowrap">
                         {['totalAssets', 'loan', 'pureAssets'].includes(row.key)
                           ? '-'
-                          : Math.round(
-                              (row.isExp
+                          : formatToMan(
+                              row.isExp
                                 ? prevTotals.exp[row.key]
-                                : prevTotals[row.key]) / 1000
-                            ).toLocaleString()}
+                                : prevTotals[row.key]
+                            )}
                       </td>
-                      <td className="p-1 bg-stone-100 font-bold">
+                      <td className="py-2 px-2 bg-stone-100 font-bold whitespace-nowrap">
                         {['totalAssets', 'loan', 'pureAssets'].includes(row.key)
                           ? '-'
-                          : Math.round(
-                              (row.isExp
+                          : formatToMan(
+                              row.isExp
                                 ? recentTotals.exp[row.key]
-                                : recentTotals[row.key]) / 1000
-                            ).toLocaleString()}
+                                : recentTotals[row.key]
+                            )}
                       </td>
                     </tr>
                   ))}
@@ -1700,7 +1687,6 @@ export default function App() {
                       ズレが少ないほど、マネコロは立派に成長します。
                     </p>
                   </div>
-
                   <div className="bg-white border-2 border-stone-800 p-4 rounded-lg shadow-[2px_2px_0_0_#292524]">
                     <h3 className="font-bold text-lg mb-2">📝 キロクの手順</h3>
                     <ol className="text-sm space-y-3 text-stone-700 list-decimal list-inside font-bold">
@@ -1732,7 +1718,6 @@ export default function App() {
                       </li>
                     </ol>
                   </div>
-
                   <div className="bg-stone-800 text-white border-2 border-stone-800 p-4 rounded-lg">
                     <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
                       🌟 進化のヒント
@@ -1769,7 +1754,6 @@ export default function App() {
                   </button>
                 </div>
                 <div className="space-y-6">
-                  {/* ヘルプボタンを追加 */}
                   <button
                     onClick={() => setStep('help')}
                     className="w-full border-2 border-stone-800 bg-stone-800 text-white p-4 font-bold text-lg flex justify-between items-center hover:bg-stone-700 active:translate-y-1 rounded-lg shadow-[2px_2px_0_0_#292524]"
@@ -1779,7 +1763,6 @@ export default function App() {
                     </span>
                     <ChevronRight size={20} />
                   </button>
-
                   <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
                     <h3 className="font-bold mb-2">記録のペース</h3>
                     <select
@@ -1800,7 +1783,6 @@ export default function App() {
                       ※ペースを変更するとホーム画面の表示が切り替わります。
                     </p>
                   </div>
-
                   <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
                     <h3 className="font-bold mb-4">バックアップ・引き継ぎ</h3>
                     <div className="space-y-3">
@@ -1826,7 +1808,6 @@ export default function App() {
                       </p>
                     </div>
                   </div>
-
                   <div className="border-2 border-stone-800 bg-white p-4 rounded-lg">
                     <h3 className="font-bold text-red-600 mb-2">
                       データ初期化
@@ -1855,7 +1836,6 @@ export default function App() {
                       <div className="text-xl">Lv.{character.level || 1}</div>
                     </div>
                   </div>
-
                   <div className="w-full px-6 flex justify-end">
                     {character.stage > 0 && (
                       <div className="text-[10px] font-bold text-stone-500 bg-stone-200 px-2 py-0.5 rounded">
@@ -1864,9 +1844,7 @@ export default function App() {
                       </div>
                     )}
                   </div>
-
                   {renderAA(character)}
-
                   <div className="w-full px-6 flex flex-col gap-3">
                     <button
                       onClick={() => setStep('select_period')}
@@ -1896,7 +1874,6 @@ export default function App() {
                       <ChevronLeft size={20} />
                     </button>
                   </div>
-
                   <div className="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
                     {displayPeriods.length === 0 ? (
                       <div className="border-2 border-stone-800 bg-stone-50 p-4 rounded-lg">
@@ -1999,9 +1976,7 @@ export default function App() {
                   <h2 className="text-2xl font-black mb-4 text-center tracking-widest text-stone-800 border-b-4 border-stone-800 pb-2 shrink-0">
                     ケッカハッピョウ
                   </h2>
-
                   <div className="space-y-4 font-bold text-stone-700 pb-4">
-                    {/* ① 現実の収支 */}
                     <div className="border-2 border-stone-800 bg-white p-3 shadow-[2px_2px_0_0_#292524] rounded-lg">
                       <h3 className="text-sm text-stone-500 mb-2 border-b border-stone-200 pb-1">
                         ① 現実の収支（家計の頑張り）
@@ -2052,8 +2027,6 @@ export default function App() {
                         </p>
                       )}
                     </div>
-
-                    {/* ② あなたの感覚 */}
                     <div className="border-2 border-stone-800 bg-white p-3 shadow-[2px_2px_0_0_#292524] rounded-lg">
                       <h3 className="text-sm text-stone-500 mb-2 border-b border-stone-200 pb-1">
                         ② あなたの感覚（どうなる予定だった？）
@@ -2082,8 +2055,6 @@ export default function App() {
                         </span>
                       </div>
                     </div>
-
-                    {/* ③ 答え合わせ */}
                     <div
                       className={`border-4 p-3 shadow-[2px_2px_0_0_#292524] rounded-lg shrink-0 ${
                         finance.isGood
@@ -2110,7 +2081,6 @@ export default function App() {
                       </p>
                     </div>
                   </div>
-
                   <button
                     onClick={handleEvolution}
                     className="w-full mt-2 border-2 border-stone-800 bg-stone-800 text-white p-4 font-bold text-xl flex justify-center items-center gap-2 hover:bg-stone-700 active:translate-y-1 rounded-lg shrink-0"
@@ -2129,11 +2099,9 @@ export default function App() {
                       ? '順調！'
                       : 'ヤミのオーラ...'}
                   </h2>
-
                   <div className="flex-1 flex flex-col justify-center items-center w-full my-4">
                     {renderAA(character)}
                   </div>
-
                   <div className="bg-white border-2 border-stone-800 p-4 w-full shadow-[2px_2px_0_0_#292524] rounded-lg">
                     <p className="font-bold text-center whitespace-pre-line leading-relaxed">
                       {character.lastEvent === 'hatch'
@@ -2157,7 +2125,6 @@ export default function App() {
                           )}%...\nズレが大きすぎて\nヤミのオーラに包まれた...`}
                     </p>
                   </div>
-
                   <button
                     onClick={() => {
                       setStep('home');
@@ -2170,7 +2137,6 @@ export default function App() {
                 </div>
               ) : (
                 <>
-                  {/* ウィザード：案内画面と入力画面 */}
                   {step === 'intro_start' &&
                     renderIntroScreen({
                       title: '【初回】\nスタート時の残高',

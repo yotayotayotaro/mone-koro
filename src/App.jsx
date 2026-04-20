@@ -765,7 +765,7 @@ export default function App() {
     const newLevel = Math.max(1, 1 + Math.floor(growthAmount / 50000));
     const displayLevel = Math.min(newLevel, 16);
 
-    // 【修正】倍率を最大約3倍に戻し、枠に収まらないほどの巨大さを演出
+    // 倍率を最大約3倍に戻し、枠に収まらないほどの巨大さを演出
     const newScale = 1.0 + (displayLevel - 1) * 0.133;
 
     newChar.level = newLevel;
@@ -843,7 +843,7 @@ export default function App() {
       transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
     };
     return (
-      // 【修正】overflow-visible を overflow-hidden に変更し、はみ出た部分を非表示（クリッピング）にする
+      // overflow-hidden にし、はみ出た部分を非表示（クリッピング）にする
       <div className="flex justify-center items-center h-48 sm:h-64 relative overflow-hidden pointer-events-none opacity-90 w-full">
         <div
           style={scaleStyle}
@@ -1179,10 +1179,17 @@ export default function App() {
     10
   );
 
-  // グラフ上の絶対位置(left%)を計算 (等間隔に配置)
-  const getLeftPercent = (i) => (i / Math.max(dataLen - 1, 1)) * 100;
+  // 【修正】グラフ上の絶対位置(left%)を計算。両端が枠（Y軸）に被らないよう、各データセルの中央に配置
+  const getLeftPercent = (i) => ((i + 0.5) / Math.max(dataLen, 1)) * 100;
 
-  // ラベルフォーマット (例: 25/4)
+  // 【修正】ピックアップラベル・X軸ラベルの配置スタイル（端のはみ出し防止）
+  const getLabelStyle = (i) => {
+    if (i === 0) return { left: '0%', transform: 'translateX(0)' };
+    if (i === dataLen - 1)
+      return { left: '100%', transform: 'translateX(-100%)' };
+    return { left: `${getLeftPercent(i)}%`, transform: 'translateX(-50%)' };
+  };
+
   const shortLabel = (d) =>
     d
       ? d.label
@@ -1192,7 +1199,6 @@ export default function App() {
           .replace('週', '')
       : '';
 
-  // 数値を「万円単位 (小数第1位)」でフォーマットする関数
   const formatToMan = (val) => {
     if (val === 0) return '0';
     const man = val / 10000;
@@ -1258,21 +1264,15 @@ export default function App() {
                 </div>
               </div>
 
-              {/* ピックアップラベル */}
-              {/* 【修正】親コンテナに px-8 を付与して左右にパディングを作り、ラベルがはみ出さないように */}
               <div className="relative h-10 w-full mb-1 px-8 sm:px-10">
                 <div className="relative w-full h-full">
                   {uniqueTargetIndices.map((i) => {
                     const d = pageData[i];
                     return (
-                      // 【修正】w-16 の固定幅を与えて、3つのラベルの横幅を完全に統一
                       <div
                         key={i}
                         className="absolute flex flex-col items-center bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap w-16 sm:w-20"
-                        style={{
-                          left: `${getLeftPercent(i)}%`,
-                          transform: 'translateX(-50%)',
-                        }}
+                        style={getLabelStyle(i)}
                       >
                         <span className="text-[8px] text-stone-500 font-bold mb-0.5">
                           {shortLabel(d)}
@@ -1289,10 +1289,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* グラフ本体共通コンテナ（目盛り付き） */}
               <div className="relative mt-2 px-8 sm:px-10">
-                {/* Y軸ラベル */}
-                {/* 【修正】Y軸ラベルの幅を広げ(w-8)、窮屈さを解消 */}
                 <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
                   <span className="translate-y-[-50%]">
                     {formatToMan(maxAssets)}
@@ -1305,9 +1302,7 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* グラフ領域 */}
                 <div className="relative w-full h-32 border-l-2 border-b-2 border-stone-800">
-                  {/* 背景の目盛り線 */}
                   <div
                     className="absolute w-full border-t border-stone-200"
                     style={{ top: '0%' }}
@@ -1380,19 +1375,14 @@ export default function App() {
                   </svg>
                 </div>
 
-                {/* X軸ラベル */}
                 <div className="relative w-full h-4 mt-1">
-                  {/* 【修正】文字重なりを防ぐため、ピックアップと同じ起点・中間・最新の3点のみ描画 */}
                   {uniqueTargetIndices.map((i) => {
                     const d = pageData[i];
                     return (
                       <span
                         key={i}
                         className="absolute text-[7px] sm:text-[8px] text-stone-500 font-bold"
-                        style={{
-                          left: `${getLeftPercent(i)}%`,
-                          transform: 'translateX(-50%)',
-                        }}
+                        style={getLabelStyle(i)}
                       >
                         {shortLabel(d)}
                       </span>
@@ -1420,14 +1410,10 @@ export default function App() {
                   {uniqueTargetIndices.map((i) => {
                     const d = pageData[i];
                     return (
-                      // 【修正】w-20 の固定幅を与えて、3つのラベルの横幅を完全に統一
                       <div
                         key={i}
                         className="absolute flex flex-col bg-stone-50 border border-stone-200 rounded p-1 shadow-sm z-10 whitespace-nowrap w-20 sm:w-24"
-                        style={{
-                          left: `${getLeftPercent(i)}%`,
-                          transform: 'translateX(-50%)',
-                        }}
+                        style={getLabelStyle(i)}
                       >
                         <span className="text-[8px] text-stone-500 font-bold border-b border-stone-300 mb-0.5 pb-0.5 text-center">
                           {shortLabel(d)}
@@ -1458,9 +1444,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* グラフ本体共通コンテナ */}
               <div className="relative mt-2 px-8 sm:px-10">
-                {/* Y軸ラベル */}
                 <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
                   <span className="translate-y-[-50%]">
                     {formatToMan(maxExp)}
@@ -1471,7 +1455,6 @@ export default function App() {
                   <span className="translate-y-[50%]">0</span>
                 </div>
 
-                {/* グラフ領域 */}
                 <div className="relative w-full h-32 border-l-2 border-b-2 border-stone-800">
                   <div
                     className="absolute w-full border-t border-stone-200"
@@ -1538,7 +1521,6 @@ export default function App() {
                   })}
                 </div>
 
-                {/* X軸ラベル */}
                 <div className="relative w-full h-4 mt-1">
                   {uniqueTargetIndices.map((i) => {
                     const d = pageData[i];
@@ -1546,10 +1528,7 @@ export default function App() {
                       <span
                         key={i}
                         className="absolute text-[7px] sm:text-[8px] text-stone-500 font-bold"
-                        style={{
-                          left: `${getLeftPercent(i)}%`,
-                          transform: 'translateX(-50%)',
-                        }}
+                        style={getLabelStyle(i)}
                       >
                         {shortLabel(d)}
                       </span>
@@ -1569,7 +1548,6 @@ export default function App() {
               </div>
 
               <div className="relative mt-4 px-8 sm:px-10">
-                {/* Y軸ラベル */}
                 <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-[7px] text-stone-400 text-right pr-1">
                   <span className="translate-y-[-50%]">
                     {maxDiscrepancyRate.toFixed(0)}%
@@ -1580,7 +1558,6 @@ export default function App() {
                   </span>
                 </div>
 
-                {/* グラフ領域 */}
                 <div className="relative w-full h-24 border-l-2 border-stone-800">
                   <div
                     className="absolute w-full border-t border-stone-200"
@@ -1603,7 +1580,6 @@ export default function App() {
                     style={{ top: '100%' }}
                   ></div>
 
-                  {/* 【修正】文字が伸びないようSVGをやめ、HTMLの絶対配置によるスタイリッシュな棒グラフに変更 */}
                   {pageData.map((d, i) => {
                     const disc =
                       d.discrepancy !== undefined
@@ -1665,7 +1641,6 @@ export default function App() {
                   })}
                 </div>
 
-                {/* X軸ラベル */}
                 <div className="relative w-full h-4 mt-1">
                   {uniqueTargetIndices.map((i) => {
                     const d = pageData[i];
@@ -1673,10 +1648,7 @@ export default function App() {
                       <span
                         key={i}
                         className="absolute text-[7px] sm:text-[8px] text-stone-500 font-bold"
-                        style={{
-                          left: `${getLeftPercent(i)}%`,
-                          transform: 'translateX(-50%)',
-                        }}
+                        style={getLabelStyle(i)}
                       >
                         {shortLabel(d)}
                       </span>

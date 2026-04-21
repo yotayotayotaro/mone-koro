@@ -1,0 +1,15 @@
+{
+  "short_name": "マネコロ",
+  "name": "マネコロ - 感覚家計簿アプリ",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}

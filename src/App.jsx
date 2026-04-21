@@ -291,6 +291,9 @@ export default function App() {
   const [currentPeriod, setCurrentPeriod] = useState(null);
   const [stepHistory, setStepHistory] = useState([]);
 
+  // 新規追加：結果画面の詳細表示トグル
+  const [showResultDetails, setShowResultDetails] = useState(false);
+
   // --- 状態管理 ---
   const [userSettings, setUserSettings] = useState(() => {
     const saved = localStorage.getItem('manekoro_settings');
@@ -755,6 +758,9 @@ export default function App() {
       ...prev,
       [currentPeriod.id]: { status: 'completed', step: 'result', inputs },
     }));
+
+    // 新規追加：結果画面を表示する際に、詳細は閉じておく
+    setShowResultDetails(false);
     setStep('result');
   };
 
@@ -1205,6 +1211,47 @@ export default function App() {
     return Number.isInteger(man) ? man.toLocaleString() : man.toFixed(1);
   };
 
+  // 新規追加：結果画面のUI構築ロジック
+  const getResultUI = () => {
+    const rate = Math.abs(finance.discrepancy) / (finance.income || 1);
+    const diff = Math.abs(finance.discrepancy);
+    const isOver = finance.discrepancy > 0; // 浪費(感覚より多く使った)か
+
+    if (rate <= 0.01) {
+      return {
+        bg: 'bg-blue-50',
+        textColor: 'text-blue-800',
+        title: 'お見事。完璧に把握しています。',
+        desc: `ズレはわずか ¥${diff.toLocaleString()}。\n素晴らしいお金の感覚です。`,
+      };
+    } else if (rate <= 0.03) {
+      return {
+        bg: 'bg-green-50',
+        textColor: 'text-green-800',
+        title: 'いい感じです。ほぼ合っています。',
+        desc: `¥${diff.toLocaleString()} のズレ。\n誤差の範囲内ですね。`,
+      };
+    } else if (rate < 0.05) {
+      return {
+        bg: 'bg-yellow-50',
+        textColor: 'text-yellow-800',
+        title: 'ん？ 少し感覚がズレてきましたね。',
+        desc: isOver
+          ? `¥${diff.toLocaleString()}、どこに消えたか\n思い出せますか？`
+          : `¥${diff.toLocaleString()}、なぜか浮いています。\n多めに見積もっていたようです。`,
+      };
+    } else {
+      return {
+        bg: 'bg-red-50',
+        textColor: 'text-red-800',
+        title: 'あれ…こんなはずじゃなかった？',
+        desc: isOver
+          ? `¥${diff.toLocaleString()} が行方不明です。\n完全に把握から漏れています。`
+          : `¥${diff.toLocaleString()} も余っています。\nお金の感覚が麻痺しているかも。`,
+      };
+    }
+  };
+
   const renderAnalytics = () => {
     if (displayHistory.length === 0) {
       return (
@@ -1220,7 +1267,7 @@ export default function App() {
       <div className="flex flex-col min-h-full animate-fade-in text-stone-800 relative pb-10">
         <div className="flex justify-between items-center mb-4 shrink-0">
           <h2 className="text-xl font-bold border-b-2 border-stone-800 pb-1">
-            ダッシュボード
+            キロクのふりかえり
           </h2>
           {maxPage > 0 && (
             <div className="flex items-center gap-2">
@@ -1252,11 +1299,11 @@ export default function App() {
             <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
               <div className="flex flex-wrap justify-between items-center mb-2 border-b border-stone-200 pb-2 gap-y-1">
                 <h3 className="text-xs sm:text-sm font-bold whitespace-nowrap mr-2">
-                  ■ 資産推移 (総資産/純資産)
+                  ■ お金のふえかた (全資産/純資産)
                 </h3>
                 <div className="flex gap-2 sm:gap-3 text-[10px] font-bold whitespace-nowrap">
                   <span className="flex items-center gap-1">
-                    <div className="w-3 h-1 bg-green-500"></div>総資産
+                    <div className="w-3 h-1 bg-green-500"></div>全資産
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-1 bg-blue-500"></div>純資産
@@ -1393,7 +1440,7 @@ export default function App() {
             {/* 支出内訳推移 */}
             <div className="border-2 border-stone-800 bg-white p-3 sm:p-4 rounded-lg">
               <div className="mb-2 border-b border-stone-200 pb-2">
-                <h3 className="text-sm font-bold mb-1">■ 支出内訳推移</h3>
+                <h3 className="text-sm font-bold mb-1">■ 使った感覚の割合</h3>
                 <div className="flex gap-2 text-[10px] font-bold whitespace-nowrap">
                   <span className="text-orange-500">■食費</span>
                   <span className="text-blue-500">■日用品</span>
@@ -1537,9 +1584,9 @@ export default function App() {
             {/* 差異率推移 */}
             <div className="border-2 border-stone-800 bg-white p-3 rounded-lg shrink-0">
               <div className="flex justify-between items-center mb-2 border-b border-stone-200 pb-2">
-                <h3 className="text-sm font-bold">■ 差異率推移</h3>
+                <h3 className="text-sm font-bold">■ カンカクのズレ具合</h3>
                 <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-1 rounded whitespace-nowrap">
-                  差額÷収入(%)
+                  ズレ÷収入(%)
                 </span>
               </div>
 
@@ -1657,7 +1704,7 @@ export default function App() {
             {/* データテーブル */}
             <div className="border-2 border-stone-800 bg-white p-3 rounded-lg overflow-x-auto">
               <h3 className="text-sm font-bold mb-2">
-                ■ データテーブル (単位: 万円)
+                ■ くわしい数字まとめ (単位: 万円)
               </h3>
               <p className="text-[10px] text-stone-500 mb-2 font-bold shrink-0">
                 ※表は横にスクロールできます
@@ -1697,11 +1744,11 @@ export default function App() {
                 </thead>
                 <tbody>
                   {[
-                    { key: 'totalAssets', name: '総資産' },
+                    { key: 'totalAssets', name: '全資産' },
                     { key: 'loan', name: 'ローン' },
                     { key: 'pureAssets', name: '純資産' },
                     { key: 'income', name: '収入' },
-                    { key: 'expTotal', name: '支出計' },
+                    { key: 'expTotal', name: '使った感覚(計)' },
                     { key: 'food', name: '├ 食費', isExp: true },
                     { key: 'daily', name: '├ 日用品', isExp: true },
                     { key: 'hobby', name: '├ 趣味', isExp: true },
@@ -2092,122 +2139,84 @@ export default function App() {
                   </div>
                 </div>
               ) : step === 'result' ? (
-                <div className="flex flex-col h-full justify-start pt-6 px-4 animate-fade-in relative pb-10 overflow-y-auto">
-                  <h2 className="text-2xl font-black mb-4 text-center tracking-widest text-stone-800 border-b-4 border-stone-800 pb-2 shrink-0">
-                    ケッカハッピョウ
-                  </h2>
-                  <div className="space-y-4 font-bold text-stone-700 pb-4">
-                    <div className="border-2 border-stone-800 bg-white p-3 shadow-[2px_2px_0_0_#292524] rounded-lg">
-                      <h3 className="text-sm text-stone-500 mb-2 border-b border-stone-200 pb-1">
-                        ① 現実の収支（家計の頑張り）
-                      </h3>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>今回の純資産</span>
-                        <span>¥{finance.currentAssets.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>
-                          {finance.startAssets === finance.previousAssets
-                            ? 'スタート時の純資産'
-                            : '前回の純資産'}
-                        </span>
-                        <span>
-                          - ¥{finance.previousAssets.toLocaleString()}
-                        </span>
-                      </div>
-                      {finance.secProfit !== 0 && (
-                        <div className="flex justify-between text-xs text-stone-400 mb-1">
-                          <span>(投資の評価損益分)</span>
-                          <span>
-                            {finance.secProfit > 0 ? '-' : '+'} ¥
-                            {Math.abs(finance.secProfit).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-lg mt-2 pt-2 border-t border-stone-300 font-black">
-                        <span>現実の収支</span>
-                        <span
-                          className={
-                            finance.actualBalance >= 0
-                              ? 'text-blue-600'
-                              : 'text-red-600'
-                          }
-                        >
-                          {finance.actualBalance >= 0 ? '+' : ''}¥
-                          {finance.actualBalance.toLocaleString()}
-                        </span>
-                      </div>
-                      {finance.actualBalance >= 0 ? (
-                        <p className="text-[10px] text-blue-600 mt-1 text-right">
-                          ★ 黒字！純資産が増えました
-                        </p>
-                      ) : (
-                        <p className="text-[10px] text-red-600 mt-1 text-right">
-                          ▲ 赤字...純資産が減りました
-                        </p>
-                      )}
-                    </div>
-                    <div className="border-2 border-stone-800 bg-white p-3 shadow-[2px_2px_0_0_#292524] rounded-lg">
-                      <h3 className="text-sm text-stone-500 mb-2 border-b border-stone-200 pb-1">
-                        ② あなたの感覚（どうなる予定だった？）
-                      </h3>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>入力した収入</span>
-                        <span>¥{finance.income.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>使った感覚(支出計)</span>
-                        <span>
-                          - ¥{finance.senseExpenseTotal.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-lg mt-2 pt-2 border-t border-stone-300 font-black">
-                        <span>感覚の収支</span>
-                        <span
-                          className={
-                            finance.senseBalance >= 0
-                              ? 'text-blue-600'
-                              : 'text-red-600'
-                          }
-                        >
-                          {finance.senseBalance >= 0 ? '+' : ''}¥
-                          {finance.senseBalance.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
+                // 【変更】結果画面のUIをフルリニューアル
+                (() => {
+                  const ui = getResultUI();
+                  return (
                     <div
-                      className={`border-4 p-3 shadow-[2px_2px_0_0_#292524] rounded-lg shrink-0 ${
-                        finance.isGood
-                          ? 'border-stone-800 bg-stone-100'
-                          : 'border-stone-800 bg-stone-200'
-                      }`}
+                      className={`flex flex-col h-full justify-center px-6 animate-fade-in relative pb-10 ${ui.bg} transition-colors duration-500`}
                     >
-                      <p className="text-xs font-black mb-1">
-                        ③ 答え合わせ【使途不明金 (ズレ)】
-                      </p>
-                      <p className="text-3xl font-black text-center my-2">
-                        ¥{Math.abs(finance.discrepancy).toLocaleString()}
-                      </p>
-                      <p className="text-xs font-mono whitespace-pre-line leading-relaxed">
-                        {finance.isGood
-                          ? `スバラシイ！\nカンカクと現実にほとんどズレがありません。`
-                          : `警告！\nカンカクよりも ¥${Math.abs(
-                              finance.discrepancy
-                            ).toLocaleString()} ${
-                              finance.discrepancy > 0
-                                ? '多く使っています'
-                                : '使っていません'
-                            }。`}
-                      </p>
+                      <div className="flex-1 flex flex-col justify-center items-center text-center -mt-10">
+                        <h2
+                          className={`text-xl font-bold mb-8 whitespace-pre-line leading-relaxed ${ui.textColor}`}
+                        >
+                          {ui.title}
+                        </h2>
+
+                        <div className="mb-6">
+                          <p className="text-xs font-bold text-stone-500 mb-2">
+                            感覚とのズレ
+                          </p>
+                          <p
+                            className={`text-5xl font-black tracking-tighter ${ui.textColor}`}
+                          >
+                            ¥{Math.abs(finance.discrepancy).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <p className="text-sm font-bold whitespace-pre-line leading-relaxed text-stone-700">
+                          {ui.desc}
+                        </p>
+                      </div>
+
+                      <div className="w-full shrink-0 mb-4">
+                        <button
+                          onClick={() =>
+                            setShowResultDetails(!showResultDetails)
+                          }
+                          className="text-xs text-stone-500 font-bold underline w-full text-center py-2"
+                        >
+                          {showResultDetails
+                            ? '詳細を閉じる'
+                            : 'なぜこのズレになったか計算式を見る'}
+                        </button>
+                        {showResultDetails && (
+                          <div className="text-[10px] text-stone-600 bg-white/50 p-3 rounded mt-2 border border-stone-200 animate-fade-in">
+                            <div className="flex justify-between mb-1">
+                              <span>現実の純資産増減:</span>
+                              <span>
+                                {finance.actualBalance > 0 ? '+' : ''}¥
+                                {finance.actualBalance.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between mb-1">
+                              <span>感覚の収支 (収入-支出):</span>
+                              <span>
+                                {finance.senseBalance > 0 ? '+' : ''}¥
+                                {finance.senseBalance.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="border-t border-stone-300 my-1"></div>
+                            <div className="flex justify-between font-bold">
+                              <span>ズレ (使途不明金):</span>
+                              <span>
+                                ¥
+                                {Math.abs(finance.discrepancy).toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={handleEvolution}
+                        className="w-full border-2 border-stone-800 bg-stone-800 text-white p-4 font-bold text-lg flex justify-center items-center gap-2 hover:bg-stone-700 active:translate-y-1 rounded-lg shrink-0 shadow-[4px_4px_0_0_#292524]"
+                      >
+                        マネコロの様子を見る <ChevronRight size={24} />
+                      </button>
                     </div>
-                  </div>
-                  <button
-                    onClick={handleEvolution}
-                    className="w-full mt-2 border-2 border-stone-800 bg-stone-800 text-white p-4 font-bold text-xl flex justify-center items-center gap-2 hover:bg-stone-700 active:translate-y-1 rounded-lg shrink-0"
-                  >
-                    ヨウスヲミル <ChevronRight size={24} />
-                  </button>
-                </div>
+                  );
+                })()
               ) : step === 'evolution' ? (
                 <div className="flex flex-col h-full justify-between items-center py-12 px-4 animate-fade-in relative pb-10">
                   <h2 className="text-2xl font-black text-center tracking-widest text-stone-800 mb-4 border-b-2 border-stone-800 pb-2">
